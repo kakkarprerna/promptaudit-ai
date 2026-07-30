@@ -1,6 +1,11 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <Navbar />
@@ -22,7 +27,10 @@ export default function Home() {
         </p>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <button className="rounded-xl bg-indigo-600 px-6 py-3 font-medium transition hover:bg-indigo-500">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="rounded-xl bg-indigo-600 px-6 py-3 font-medium transition hover:bg-indigo-500"
+          >
             Start Evaluation
           </button>
 
