@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import EvaluationCard from "@/components/EvaluationCard";
+import EvaluationCard from "@/components/components/EvaluationCard";
 
 export default function DashboardPage() {
   const [prompt, setPrompt] = useState("");
