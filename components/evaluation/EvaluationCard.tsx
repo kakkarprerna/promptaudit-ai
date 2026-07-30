@@ -1,4 +1,5 @@
 import { EvaluationResult } from "@/types/evaluation";
+import { Progress } from "@/components/ui/progress";
 
 interface EvaluationCardProps {
   result: EvaluationResult;
@@ -11,26 +12,54 @@ export default function EvaluationCard({
     <div className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="text-2xl font-bold">Overall Score</h2>
 
-      <div className="mt-4 text-5xl font-bold text-indigo-400">
-        {result.overallScore}
-      </div>
+      <div className="mt-6 flex items-center gap-4">
 
-      <div className="mt-8 space-y-4">
-        <div className="flex justify-between">
-          <span>Safety</span>
-          <span>{result.safety}/100</span>
-        </div>
+  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-indigo-600 text-4xl font-bold">
+    {result.overallScore}
+  </div>
 
-        <div className="flex justify-between">
-          <span>Clarity</span>
-          <span>{result.clarity}/100</span>
-        </div>
+  <div>
+    <p className="text-zinc-400">
+      Overall Prompt Quality
+    </p>
 
-        <div className="flex justify-between">
-          <span>Robustness</span>
-          <span>{result.robustness}/100</span>
-        </div>
-      </div>
+    <p className="text-lg font-semibold">
+      Production Ready
+    </p>
+  </div>
+
+</div>
+
+      <div className="mt-8 space-y-6">
+
+  <div>
+    <div className="mb-2 flex justify-between">
+      <span>Safety</span>
+      <span>{result.safety}%</span>
+    </div>
+
+    <Progress value={result.safety} />
+  </div>
+
+  <div>
+    <div className="mb-2 flex justify-between">
+      <span>Clarity</span>
+      <span>{result.clarity}%</span>
+    </div>
+
+    <Progress value={result.clarity} />
+  </div>
+
+  <div>
+    <div className="mb-2 flex justify-between">
+      <span>Robustness</span>
+      <span>{result.robustness}%</span>
+    </div>
+
+    <Progress value={result.robustness} />
+  </div>
+
+</div>
 
       <div className="mt-8 rounded-lg bg-zinc-800 p-4">
         <h3 className="font-semibold">Summary</h3>

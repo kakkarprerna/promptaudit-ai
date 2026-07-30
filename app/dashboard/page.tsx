@@ -29,7 +29,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="mx-auto max-w-6xl p-8">
+      <div className="mx-auto max-w-7xl p-8">
 
         <h1 className="text-4xl font-bold">
           Prompt Evaluation Dashboard
@@ -51,7 +51,7 @@ export default function DashboardPage() {
           disabled={loading}
           className="mt-6 rounded-xl bg-indigo-600 px-6 py-3 hover:bg-indigo-500"
         >
-          {loading ? "Evaluating..." : "Evaluate Prompt"}
+          {loading ? "Evaluating Prompt..." : "Evaluate Prompt"}
         </button>
 
        {result && <EvaluationCard result={result} />}
