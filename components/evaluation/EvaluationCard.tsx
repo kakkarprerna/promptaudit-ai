@@ -8,94 +8,151 @@ interface EvaluationCardProps {
 export default function EvaluationCard({
   result,
 }: EvaluationCardProps) {
+  const verdict =
+    result.overallScore >= 85
+      ? "Excellent"
+      : result.overallScore >= 70
+      ? "Good"
+      : "Needs Improvement";
+
+  const risk =
+    result.safety >= 90
+      ? "Low Risk"
+      : result.safety >= 70
+      ? "Medium Risk"
+      : "High Risk";
+
   return (
     <div className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <h2 className="text-2xl font-bold">Overall Score</h2>
+      {/* Overall Score */}
+      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-6">
+        <h2 className="text-xl font-semibold text-zinc-300">
+          Overall Score
+        </h2>
 
-      <div className="mt-6 flex items-center gap-4">
+        <div className="mt-4 flex items-end gap-2">
+          <span className="text-6xl font-bold text-indigo-400">
+            {result.overallScore}
+          </span>
 
-  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-indigo-600 text-4xl font-bold">
-    {result.overallScore}
-  </div>
+          <span className="mb-2 text-xl text-zinc-500">
+            /100
+          </span>
+        </div>
 
-  <div>
-    <p className="text-zinc-400">
-      Overall Prompt Quality
-    </p>
+        <div className="mt-6">
+          <Progress value={result.overallScore} />
+        </div>
 
-    <p className="text-lg font-semibold">
-      Production Ready
-    </p>
-  </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <span
+            className={`rounded-full px-4 py-2 text-sm font-semibold text-white ${
+              result.overallScore >= 85
+                ? "bg-green-600"
+                : result.overallScore >= 70
+                ? "bg-yellow-600"
+                : "bg-red-600"
+            }`}
+          >
+            {verdict}
+          </span>
 
-</div>
+          <span
+            className={`rounded-full px-4 py-2 text-sm font-semibold text-white ${
+              result.safety >= 90
+                ? "bg-green-700"
+                : result.safety >= 70
+                ? "bg-yellow-700"
+                : "bg-red-700"
+            }`}
+          >
+            {risk}
+          </span>
+        </div>
+      </div>
 
+      {/* Metrics */}
       <div className="mt-8 space-y-6">
+        <div>
+          <div className="mb-2 flex justify-between">
+            <span>🛡 Safety</span>
+            <span>{result.safety}%</span>
+          </div>
 
-  <div>
-    <div className="mb-2 flex justify-between">
-      <span>Safety</span>
-      <span>{result.safety}%</span>
-    </div>
+          <Progress value={result.safety} />
+        </div>
 
-    <Progress value={result.safety} />
-  </div>
+        <div>
+          <div className="mb-2 flex justify-between">
+            <span>📝 Clarity</span>
+            <span>{result.clarity}%</span>
+          </div>
 
-  <div>
-    <div className="mb-2 flex justify-between">
-      <span>Clarity</span>
-      <span>{result.clarity}%</span>
-    </div>
+          <Progress value={result.clarity} />
+        </div>
 
-    <Progress value={result.clarity} />
-  </div>
+        <div>
+          <div className="mb-2 flex justify-between">
+            <span>🧠 Robustness</span>
+            <span>{result.robustness}%</span>
+          </div>
 
-  <div>
-    <div className="mb-2 flex justify-between">
-      <span>Robustness</span>
-      <span>{result.robustness}%</span>
-    </div>
-
-    <Progress value={result.robustness} />
-  </div>
-
-</div>
-
-      <div className="mt-8 rounded-lg bg-zinc-800 p-4">
-        <h3 className="font-semibold">Summary</h3>
-        <p className="mt-2 text-zinc-300">{result.summary}</p>
+          <Progress value={result.robustness} />
+        </div>
       </div>
 
-      {/* NEW: Strengths */}
-      <div className="mt-8">
-        <h3 className="font-semibold text-green-400">Strengths</h3>
-        <ul className="mt-2 list-disc pl-5 text-zinc-300">
-          {result.strengths.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+      {/* Executive Summary */}
+      <div className="mt-10 rounded-xl border border-indigo-800 bg-indigo-950/20 p-6">
+        <h3 className="text-lg font-semibold">
+          Executive Summary
+        </h3>
+
+        <p className="mt-3 text-zinc-300">
+          {result.summary}
+        </p>
       </div>
 
-      {/* NEW: Weaknesses */}
-      <div className="mt-8">
-        <h3 className="font-semibold text-yellow-400">Weaknesses</h3>
-        <ul className="mt-2 list-disc pl-5 text-zinc-300">
-          {result.weaknesses.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </div>
+      {/* Insights */}
+      <div className="mt-10 grid gap-6 lg:grid-cols-3">
+        {/* Strengths */}
+        <div className="rounded-xl border border-green-700 bg-green-950/20 p-5">
+          <h3 className="mb-3 text-lg font-semibold text-green-400">
+            ✅ Strengths
+          </h3>
 
-      {/* NEW: Recommendations */}
-      <div className="mt-8">
-        <h3 className="font-semibold text-blue-400">Recommendations</h3>
-        <ul className="mt-2 list-disc pl-5 text-zinc-300">
-          {result.recommendations.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </div>
+          <ul className="space-y-2 text-zinc-300">
+            {result.strengths.map((item) => (
+              <li key={item}>• {item}</li>
+            ))}
+          </ul>
+        </div>
 
+        {/* Weaknesses */}
+        <div className="rounded-xl border border-yellow-700 bg-yellow-950/20 p-5">
+          <h3 className="mb-3 text-lg font-semibold text-yellow-400">
+            ⚠ Weaknesses
+          </h3>
+
+          <ul className="space-y-2 text-zinc-300">
+            {result.weaknesses.map((item) => (
+              <li key={item}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Recommendations */}
+        <div className="rounded-xl border border-blue-700 bg-blue-950/20 p-5">
+          <h3 className="mb-3 text-lg font-semibold text-blue-400">
+            💡 Recommendations
+          </h3>
+
+          <ul className="space-y-2 text-zinc-300">
+            {result.recommendations.map((item) => (
+              <li key={item}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
