@@ -1,11 +1,15 @@
 "use client";
 
-import { Copy } from "lucide-react";
+import { Copy, FileDown, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import EvaluationCard from "@/components/evaluation/EvaluationCard";
 import ComparisonCard from "@/components/evaluation/ComparisonCard";
 import SecurityCard from "@/components/evaluation/SecurityCard";
 import { EvaluationResult } from "@/types/evaluation";
+import ScoreCards from "@/components/charts/ScoreCards";
+import RadarComparison from "@/components/charts/RadarComparison";
+import ExecutiveSummary from "@/components/charts/ExecutiveSummary";
+import { generatePDF } from "@/lib/pdf";
 
 export default function DashboardPage() {
   const [prompt, setPrompt] = useState("");
@@ -105,6 +109,51 @@ async function evaluatePrompt() {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-7xl p-8">
+        {result && improvedResult && (
+  <div className="sticky top-4 z-50 mb-8">
+    <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-900/95 px-6 py-4 shadow-xl backdrop-blur">
+      <div>
+        <h2 className="text-lg font-bold">Audit Complete</h2>
+        <p className="text-sm text-zinc-400">
+          Export your report or start a new audit.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => generatePDF(result, improvedResult)}
+          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold transition hover:bg-indigo-500"
+        >
+          <FileDown size={18} />
+          PDF
+        </button>
+
+        <button
+          onClick={() =>
+            navigator.clipboard.writeText(improvedPrompt)
+          }
+          className="flex items-center gap-2 rounded-xl bg-zinc-800 px-5 py-3 hover:bg-zinc-700"
+        >
+          <Copy size={18} />
+          Copy
+        </button>
+
+        <button
+          onClick={() => {
+            setPrompt("");
+            setResult(null);
+            setImprovedPrompt("");
+            setImprovedResult(null);
+          }}
+          className="flex items-center gap-2 rounded-xl bg-zinc-800 px-5 py-3 hover:bg-zinc-700"
+        >
+          <RotateCcw size={18} />
+          New Audit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         <h1 className="text-4xl font-bold">
           Prompt Evaluation Dashboard
         </h1>
@@ -142,6 +191,12 @@ async function evaluatePrompt() {
 
         {result && (
           <>
+          <ScoreCards
+        overallScore={result.overallScore}
+        safety={result.safety}
+        clarity={result.clarity}
+        robustness={result.robustness}
+      />
             <EvaluationCard result={result} />
 
             {result?.security && (
@@ -190,6 +245,10 @@ async function evaluatePrompt() {
 
             {improvedResult && (
               <>
+              <ExecutiveSummary
+  original={result}
+  improved={improvedResult}
+/>
                 <EvaluationCard result={improvedResult} />
 
                {improvedResult?.security && (
@@ -200,6 +259,11 @@ async function evaluatePrompt() {
                   original={result}
                   improved={improvedResult}
                 />
+                <RadarComparison
+  original={result}
+  improved={improvedResult}
+/>
+
               </>
             )}
           </>
