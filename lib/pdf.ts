@@ -1,83 +1,222 @@
 import jsPDF from "jspdf";
 import { EvaluationResult } from "@/types/evaluation";
 
+function sectionTitle(doc: jsPDF, title: string, y: number) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.text(title, 20, y);
+}
+
+function bodyText(doc: jsPDF, text: string, x: number, y: number) {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(70, 70, 70);
+
+  const lines = doc.splitTextToSize(text, 170);
+  doc.text(lines, x, y);
+
+  return y + lines.length * 6;
+}
+
 export function generatePDF(
   original: EvaluationResult,
-  improved: EvaluationResult
+  improved: EvaluationResult,
+  improvedPrompt?: string
 ) {
   const doc = new jsPDF();
 
-  let y = 20;
+  // -----------------------
+  // COVER PAGE
+  // -----------------------
 
-  doc.setFontSize(22);
-  doc.text("PromptAudit AI Report", 20, y);
+  doc.setFillColor(49, 46, 129);
+  doc.rect(0, 0, 210, 45, "F");
+
+  doc.setFontSize(28);
+  doc.setTextColor(255, 255, 255);
+  doc.text("PromptAudit AI", 20, 25);
+
+  doc.setFontSize(14);
+  doc.text("AI Prompt Security Audit Report", 20, 35);
+
+  let y = 65;
+
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(20);
+  doc.text("Executive Summary", 20, y);
 
   y += 15;
 
-  doc.setFontSize(14);
-  doc.text(`Original Score: ${original.overallScore}`, 20, y);
+  doc.setFontSize(12);
 
-  y += 10;
-  doc.text(`Improved Score: ${improved.overallScore}`, 20, y);
-
-  y += 10;
   doc.text(
-    `Improvement: ${improved.overallScore - original.overallScore}`,
+    `Generated: ${new Date().toLocaleDateString()}`,
     20,
     y
   );
-
-  y += 20;
-
-  doc.setFontSize(18);
-  doc.text("Security Audit", 20, y);
 
   y += 12;
 
-  doc.setFontSize(12);
-  doc.text(`Risk Level: ${improved.security.riskLevel}`, 20, y);
+  doc.text(`Original Score: ${original.overallScore}/100`, 20, y);
 
   y += 10;
+
+  doc.text(`Improved Score: ${improved.overallScore}/100`, 20, y);
+
+  y += 10;
+
   doc.text(
-    `Prompt Injection Risk: ${improved.security.promptInjectionRisk}`,
+    `Score Improvement: +${improved.overallScore - original.overallScore}`,
     20,
     y
   );
 
-  y += 10;
-  doc.text(
-    `Hallucination Risk: ${improved.security.hallucinationRisk}`,
-    20,
-    y
-  );
+  y += 15;
 
-  y += 10;
-  doc.text(
-    `Instruction Conflict: ${improved.security.instructionConflict}`,
-    20,
-    y
-  );
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
 
-  y += 10;
   doc.text(
-    `Data Leakage Risk: ${improved.security.dataLeakageRisk}`,
+    `Overall Risk Level: ${improved.security.riskLevel}`,
     20,
     y
   );
 
   y += 20;
 
-  doc.setFontSize(18);
-  doc.text("Recommendations", 20, y);
+  bodyText(
+    doc,
+    "This report evaluates the submitted production prompt for clarity, robustness, safety, prompt injection resistance and overall quality. It also compares the original and improved versions and provides actionable recommendations.",
+    20,
+    y
+  );
 
-  y += 10;
+  // -----------------------
+  // PAGE 2
+  // -----------------------
 
-  doc.setFontSize(12);
+  doc.addPage();
 
-  improved.recommendations.forEach((item) => {
-    doc.text(`• ${item}`, 25, y);
-    y += 8;
+  y = 25;
+
+  sectionTitle(doc, "Score Comparison", y);
+
+  y += 20;
+
+  doc.setFontSize(14);
+
+  doc.text("Original Prompt", 20, y);
+  doc.text(String(original.overallScore), 150, y);
+
+  y += 18;
+
+  doc.text("Improved Prompt", 20, y);
+  doc.text(String(improved.overallScore), 150, y);
+
+  y += 18;
+
+  doc.text("Improvement", 20, y);
+  doc.text(
+    "+" + (improved.overallScore - original.overallScore),
+    150,
+    y
+  );
+
+  // -----------------------
+  // PAGE 3
+  // -----------------------
+
+  doc.addPage();
+
+  y = 25;
+
+  sectionTitle(doc, "Security Audit", y);
+
+  y += 20;
+
+  const security = improved.security;
+
+  const rows = [
+    ["Overall Risk", security.riskLevel],
+    ["Prompt Injection", security.promptInjectionRisk],
+    ["Hallucination", security.hallucinationRisk],
+    ["Instruction Conflict", security.instructionConflict],
+    ["Data Leakage", security.dataLeakageRisk],
+  ];
+
+  rows.forEach((row) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(row[0], 20, y);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(String(row[1]), 110, y);
+
+    y += 12;
   });
 
-  doc.save("PromptAudit-Report.pdf");
+  // -----------------------
+  // PAGE 4
+  // -----------------------
+
+  doc.addPage();
+
+  y = 25;
+
+  sectionTitle(doc, "Recommendations", y);
+
+  y += 18;
+
+  improved.recommendations.forEach((item) => {
+    y = bodyText(doc, "• " + item, 20, y);
+    y += 3;
+  });
+
+  // -----------------------
+  // PAGE 5
+  // -----------------------
+
+  if (improvedPrompt) {
+    doc.addPage();
+
+    y = 25;
+
+    sectionTitle(doc, "Improved Prompt", y);
+
+    y += 15;
+
+    const lines = doc.splitTextToSize(improvedPrompt, 170);
+
+    doc.setFontSize(10);
+
+    doc.text(lines, 20, y);
+  }
+
+  // -----------------------
+  // Footer
+  // -----------------------
+
+  const pages = doc.getNumberOfPages();
+
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+
+    doc.setDrawColor(220);
+
+    doc.line(20, 285, 190, 285);
+
+    doc.setFontSize(9);
+
+    doc.setTextColor(120);
+
+    doc.text("Generated by PromptAudit AI", 20, 292);
+
+    doc.text(
+      `Page ${i} of ${pages}`,
+      165,
+      292
+    );
+  }
+
+  doc.save("PromptAudit-Audit-Report.pdf");
 }
