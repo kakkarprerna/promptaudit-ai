@@ -147,7 +147,7 @@ export function generatePDF(
 
   rows.forEach((row) => {
     doc.setFont("helvetica", "bold");
-    doc.text(row[0], 20, y);
+    doc.text(String(row[0]), 20, y);
 
     doc.setFont("helvetica", "normal");
     doc.text(String(row[1]), 110, y);

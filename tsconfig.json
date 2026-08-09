@@ -4,7 +4,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
 
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
 
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,9 +16,7 @@
 
     "resolveJsonModule": true,
     "isolatedModules": true,
-
     "jsx": "react-jsx",
-
     "incremental": true,
 
     "plugins": [

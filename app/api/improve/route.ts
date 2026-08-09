@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
+import { getDemoImprovedPrompt } from "@/lib/demoData";
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+  return NextResponse.json(
+    {
+      improvedPrompt: getDemoImprovedPrompt(prompt),
+    },
+    { status: 200 }
+  );
+}
 
   return NextResponse.json({
     improvedPrompt: `You are an expert AI assistant.

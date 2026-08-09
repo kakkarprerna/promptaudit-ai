@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { getDemoEvaluation } from "@/lib/demoData";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,99 +10,117 @@ export async function POST(request: Request) {
   try {
     const { prompt } = await request.json();
 
+    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+      return NextResponse.json(
+        {
+          error: "Please provide a prompt to evaluate.",
+        },
+        { status: 400 }
+      );
+    }
+if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+  return NextResponse.json(
+    getDemoEvaluation(prompt),
+    { status: 200 }
+  );
+}
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
       input: `
 You are a senior AI Security Auditor.
 
-Evaluate the following system prompt.
+Evaluate the following system prompt for:
 
-Score it on:
-- Safety
-- Clarity
-- Robustness
+1. Overall quality
+2. Safety
+3. Clarity
+4. Robustness
+5. Security risks
 
-Then perform a security audit.
-
-Identify:
-
-- Prompt injection risks
-- Missing safety guardrails
-- Hallucination risks
-- Instruction conflicts
-- Potential data leakage
-- Missing output constraints
-
-Return ONLY valid JSON matching this schema.
+Return ONLY valid JSON using this exact structure:
 
 {
   "overallScore": number,
   "safety": number,
   "clarity": number,
   "robustness": number,
-  "summary": "",
-  "strengths": [],
-  "weaknesses": [],
-  "recommendations": [],
-
+  "summary": string,
+  "strengths": string[],
+  "weaknesses": string[],
+  "recommendations": string[],
   "security": {
-    "riskLevel": "Low | Medium | High",
+    "riskLevel": "Low" | "Medium" | "High",
     "promptInjectionRisk": number,
     "hallucinationRisk": number,
     "instructionConflict": number,
     "dataLeakageRisk": number,
-    "missingGuardrails": []
+    "missingGuardrails": string[]
   }
 }
 
-Prompt:
+All scores must be integers from 0 to 100.
+
+System prompt to evaluate:
+
 ${prompt}
-`,
+      `,
     });
 
-    return NextResponse.json(JSON.parse(response.output_text));
-  } catch (error) {
-    console.error(error);
+    const output = response.output_text;
 
-    // Fallback mock response
-    return NextResponse.json({
-  overallScore: 84,
-  safety: 92,
-  clarity: 80,
-  robustness: 78,
-  summary:
-    "OpenAI API unavailable. Showing mock evaluation instead.",
+    let result;
 
-  strengths: [
-    "Clear role definition",
-    "Concise instructions",
-    "Focused objective",
-  ],
+    try {
+      result = JSON.parse(output);
+    } catch {
+      return NextResponse.json(
+        {
+          error: "The AI returned an invalid evaluation format. Please try again.",
+        },
+        { status: 502 }
+      );
+    }
 
-  weaknesses: [
-    "Missing safety guardrails",
-    "No output format specified",
-  ],
+    return NextResponse.json(result, { status: 200 });
+  } 
+  catch (error: unknown) {
+  console.error("Evaluation API error:", error);
 
-  recommendations: [
-    "Add refusal instructions.",
-    "Specify the expected output format.",
-    "Handle ambiguous user requests.",
-  ],
+  if (error instanceof OpenAI.APIError) {
+    // No API credits remaining
+    if (
+      error.status === 429 &&
+      error.code === "credit_balance_exhausted"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "AI evaluation is temporarily unavailable because the API has no remaining credits.",
+          code: "INSUFFICIENT_QUOTA",
+        },
+        { status: 429 }
+      );
+    }
 
-  security: {
-    riskLevel: "Medium",
-    promptInjectionRisk: 68,
-    hallucinationRisk: 74,
-    instructionConflict: 82,
-    dataLeakageRisk: 70,
-    missingGuardrails: [
-      "Explicit refusal policy",
-      "Output format enforcement",
-      "Prompt injection defense",
-      "Sensitive data handling",
-    ],
-  },
-});
+    // Other 429 responses
+    if (error.status === 429) {
+      return NextResponse.json(
+        {
+          error:
+            "AI evaluation is temporarily unavailable. Please try again shortly.",
+          code: "RATE_LIMITED",
+        },
+        { status: 429 }
+      );
+    }
   }
+
+  return NextResponse.json(
+    {
+      error: "Something went wrong while evaluating the prompt.",
+      code: "EVALUATION_FAILED",
+    },
+    { status: 500 }
+  );
+}
 }

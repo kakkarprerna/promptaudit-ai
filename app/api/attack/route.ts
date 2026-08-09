@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-
+import { getDemoAttackResult } from "@/lib/demoData";
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -8,6 +8,12 @@ const client = new OpenAI({
 export async function POST(request: Request) {
   try {
     const { prompt } = await request.json();
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+  return NextResponse.json(
+    getDemoAttackResult(prompt),
+    { status: 200 }
+  );
+}
 
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
