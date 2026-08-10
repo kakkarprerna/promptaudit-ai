@@ -101,14 +101,10 @@ ${prompt}
   } catch (error) {
     console.error("Evaluation API error:", error);
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unknown Gemini API error";
-
     return NextResponse.json(
       {
-        error: message,
+        error:
+          "Something went wrong while evaluating the prompt. Please try again.",
         code: "EVALUATION_FAILED",
       },
       { status: 500 }
