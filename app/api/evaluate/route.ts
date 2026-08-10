@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getDemoEvaluation } from "@/lib/demoData";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const client = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY || ""
+);
 
 export async function POST(request: Request) {
   try {
@@ -12,21 +12,32 @@ export async function POST(request: Request) {
 
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
       return NextResponse.json(
-        {
-          error: "Please provide a prompt to evaluate.",
-        },
+        { error: "Please provide a prompt to evaluate." },
         { status: 400 }
       );
     }
-if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
-  return NextResponse.json(
-    getDemoEvaluation(prompt),
-    { status: 200 }
-  );
-}
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: `
+
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+      return NextResponse.json(getDemoEvaluation(prompt), {
+        status: 200,
+      });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json(
+        {
+          error: "AI service is not configured.",
+          code: "MISSING_API_KEY",
+        },
+        { status: 503 }
+      );
+    }
+
+    const model = client.getGenerativeModel({
+      model: "gemini-2.5-flash",
+    });
+
+    const result = await model.generateContent(`
 You are a senior AI Security Auditor.
 
 Evaluate the following system prompt for:
@@ -63,64 +74,40 @@ All scores must be integers from 0 to 100.
 System prompt to evaluate:
 
 ${prompt}
-      `,
-    });
+`);
 
-    const output = response.output_text;
+    const output = result.response
+      .text()
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    let result;
+    let evaluation;
 
     try {
-      result = JSON.parse(output);
+      evaluation = JSON.parse(output);
     } catch {
       return NextResponse.json(
         {
-          error: "The AI returned an invalid evaluation format. Please try again.",
+          error:
+            "The AI returned an invalid evaluation format. Please try again.",
+          code: "INVALID_AI_RESPONSE",
         },
         { status: 502 }
       );
     }
 
-    return NextResponse.json(result, { status: 200 });
-  } 
-  catch (error: unknown) {
-  console.error("Evaluation API error:", error);
+    return NextResponse.json(evaluation, { status: 200 });
+  } catch (error) {
+    console.error("Evaluation API error:", error);
 
-  if (error instanceof OpenAI.APIError) {
-    // No API credits remaining
-    if (
-      error.status === 429 &&
-      error.code === "credit_balance_exhausted"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "AI evaluation is temporarily unavailable because the API has no remaining credits.",
-          code: "INSUFFICIENT_QUOTA",
-        },
-        { status: 429 }
-      );
-    }
-
-    // Other 429 responses
-    if (error.status === 429) {
-      return NextResponse.json(
-        {
-          error:
-            "AI evaluation is temporarily unavailable. Please try again shortly.",
-          code: "RATE_LIMITED",
-        },
-        { status: 429 }
-      );
-    }
+    return NextResponse.json(
+      {
+        error:
+          "Something went wrong while evaluating the prompt.",
+        code: "EVALUATION_FAILED",
+      },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(
-    {
-      error: "Something went wrong while evaluating the prompt.",
-      code: "EVALUATION_FAILED",
-    },
-    { status: 500 }
-  );
-}
 }
