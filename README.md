@@ -1,3 +1,9 @@
+# PromptAudit AI
+
+AI-powered prompt evaluation and security analysis.
+
+**[Live Demo → promptaudit-ai.vercel.app](https://promptaudit-ai.vercel.app)**
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
