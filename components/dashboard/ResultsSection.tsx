@@ -1,7 +1,6 @@
 "use client";
 
 import SecurityCard from "@/components/evaluation/SecurityCard";
-
 import GlassCard from "@/components/ui/GlassCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -21,19 +20,20 @@ export default function ResultsSection({
 
   return (
     <GlassCard>
-      {/* Security Findings */}
-      {result.security && (
-        <section className="p-6 md:p-8">
-          <SectionHeader
-            title="Security Findings"
-            description="Potential security risks and missing prompt guardrails."
-          />
+      {/* Header */}
+      <section className="p-6 md:p-8">
+        <SectionHeader
+          title="Security Assessment"
+          subtitle="Review the security risks and guardrails identified in your prompt."
+        />
 
+        {/* Security Findings */}
+        {result.security && (
           <div className="mt-6">
             <SecurityCard security={result.security} />
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* Primary CTA */}
       <div className="border-t border-zinc-800/80 p-6 md:p-8">

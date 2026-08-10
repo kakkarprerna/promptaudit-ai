@@ -23,34 +23,46 @@ export default function ExecutiveSummary({
         );
 
   return (
-    <div className="mt-10 rounded-xl border border-zinc-800 bg-gradient-to-r from-indigo-950 to-zinc-900 p-8">
-      <h2 className="text-2xl font-bold">
-        📋 Executive Summary
-      </h2>
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="text-lg">📋</span>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
-        <div>
-          <p className="text-zinc-400">
+        <h3 className="text-xl font-semibold text-white">
+          Executive Summary
+        </h3>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-5">
+          <p className="text-sm font-medium text-zinc-400">
             Original Score
           </p>
 
-          <p className="mt-2 text-5xl font-bold text-zinc-200">
+          <p className="mt-2 text-5xl font-bold text-zinc-100">
             {original.overallScore}
+          </p>
+
+          <p className="mt-1 text-xs text-zinc-500">
+            Baseline prompt
           </p>
         </div>
 
-        <div>
-          <p className="text-zinc-400">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-5">
+          <p className="text-sm font-medium text-zinc-400">
             Improved Score
           </p>
 
           <p className="mt-2 text-5xl font-bold text-green-400">
             {improved.overallScore}
           </p>
+
+          <p className="mt-1 text-xs text-zinc-500">
+            Revised prompt
+          </p>
         </div>
 
-        <div>
-          <p className="text-zinc-400">
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-5">
+          <p className="text-sm font-medium text-zinc-400">
             Improvement
           </p>
 
@@ -59,19 +71,19 @@ export default function ExecutiveSummary({
             {improvement}
           </p>
 
-          <p className="mt-2 text-zinc-500">
-            ({percent}%)
+          <p className="mt-1 text-xs text-zinc-500">
+            {percent}% relative improvement
           </p>
         </div>
       </div>
 
-      <div className="mt-8 rounded-lg border border-indigo-800 bg-indigo-950/30 p-5">
-        <p className="text-lg leading-8 text-zinc-300">
-          The improved prompt demonstrates a measurable increase in overall
-          quality compared with the original version. The automated refinement
-          process strengthened the prompt while preserving its intent. Review
-          the detailed metrics below to identify which dimensions improved the
-          most.
+      <div className="mt-6 rounded-xl border border-indigo-500/20 bg-indigo-950/30 p-5">
+        <p className="text-base leading-7 text-zinc-300">
+          The improved prompt demonstrates a measurable increase in
+          overall quality compared with the original version. The
+          automated refinement process strengthened the prompt while
+          preserving its intent. Review the detailed metrics below to
+          identify which dimensions improved the most.
         </p>
       </div>
     </div>

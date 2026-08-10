@@ -21,7 +21,7 @@ export default function DashboardContent() {
 
   return (
     <main>
-      <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
+     <div className="mx-auto max-w-7xl px-4 pb-32 pt-10 md:px-6">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -68,9 +68,7 @@ export default function DashboardContent() {
             </section>
           ) : (
             <div className="space-y-10">
-              <ExecutiveSummarySection
-                result={audit.result}
-              />
+              <ExecutiveSummarySection result={audit.result} />
 
               <ResultsSection
                 result={audit.result}
@@ -99,17 +97,19 @@ export default function DashboardContent() {
                 attackLoading={audit.attackLoading}
                 onRunAttack={audit.runAttackSimulation}
               />
-              <StickyToolbar
-  loading={audit.loading}
-  improvedLoading={audit.improvedLoading}
-  attackLoading={audit.attackLoading}
-  result={audit.result}
-  improvedResult={audit.improvedResult}
-  improvedPrompt={audit.improvedPrompt}
-  onReset={audit.resetAudit}
-/>
             </div>
           )}
+
+          {/* Sticky workspace toolbar */}
+          <StickyToolbar
+            loading={audit.loading}
+            improvedLoading={audit.improvedLoading}
+            attackLoading={audit.attackLoading}
+            result={audit.result}
+            improvedResult={audit.improvedResult}
+            improvedPrompt={audit.improvedPrompt}
+            onReset={audit.resetAudit}
+          />
         </motion.div>
       </div>
     </main>
